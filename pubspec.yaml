@@ -24,7 +24,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   scoped_model:
-  multi_media_picker:
+  multi_media_picker: ^0.2.3
+  chewie: ^0.9.8+1
+  video_player: ^0.10.4+1
 
 dev_dependencies:
   flutter_test:
