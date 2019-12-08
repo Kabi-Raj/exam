@@ -20,8 +20,9 @@ class _DocumentsState extends State<Documents> {
   ];
   List<File> _images = [];
 
-  getImage(ImageSource source) async {
-    var images = await MultiMediaPicker.pickImages(source: source);
+  getImages(ImageSource source, bool singleImage) async {
+    var images = await MultiMediaPicker.pickImages(
+        source: source, singleImage: singleImage);
     setState(() {
       _images = images;
     });
@@ -45,30 +46,39 @@ class _DocumentsState extends State<Documents> {
           );
   }
 
-  _showDialog() {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('Choose an option'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Gallery'),
-                onPressed: () {
-                  getImage(ImageSource.gallery);
-                  Navigator.of(context).pop();
-                },
+  _buildDocumentsGridView() {
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.all(10.0),
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      itemCount: _gridItems.length,
+      itemBuilder: (context, int index) {
+        return GestureDetector(
+            child: Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.all(10.0),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(10.0),
               ),
-              FlatButton(
-                child: Text('Camera'),
-                onPressed: () {
-                  getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
+              child: Text(
+                _gridItems[index],
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            onTap: () {
+              index == 2
+                  ? getImages(ImageSource.camera, true)
+                  : getImages(ImageSource.gallery, false);
+            });
+      },
+    );
   }
 
   @override
@@ -80,39 +90,11 @@ class _DocumentsState extends State<Documents> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            GridView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.all(10.0),
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-              itemCount: _gridItems.length,
-              itemBuilder: (context, int index) {
-                return GestureDetector(
-                  child: Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.all(10.0),
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Text(
-                      _gridItems[index],
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  onTap: _showDialog,
-                );
-              },
-            ),
+            Container(height: 600.0, child: _buildDocumentsGridView()),
             Container(
               child: _buildImageList(),
-              height: 400,
-            ),
+              height: 400.0,
+            )
           ],
         ),
       ),

@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       model: model,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        /* theme: ThemeData(
+        /* theme: ThemeData(clear
             primaryColor: Colors.blue[300], 
             accentColor: Colors.blue[200]), */
         routes: {
