@@ -10,16 +10,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MainScopedModel model = MainScopedModel();
-    return ScopedModel(
+    return ScopedModel<MainScopedModel>(
       model: model,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        /* theme: ThemeData(clear
-            primaryColor: Colors.blue[300], 
-            accentColor: Colors.blue[200]), */
         routes: {
-          '/theory': (BuildContext context) => Theory(model),
-          '/': (BuildContext context) => Documents(),
+          '/': (BuildContext context) => Theory(model),
+          '/documents': (BuildContext context) => Documents(),
         },
       ),
     );

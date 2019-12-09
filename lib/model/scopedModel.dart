@@ -35,15 +35,14 @@ class MainScopedModel extends Model {
 
   void addStudentsToSecRound(Student s) {
     print('selected student: ${s.name} isAdded: ${s.isAdded}');
-
+    int index = _firstRoundStudents.indexOf(s);
     _firstRoundStudents[_firstRoundStudents.indexOf(s)].isAdded
-        ? _secRoundStudents.remove(s)
+        ? _secRoundStudents.removeWhere(
+            (student) => student.rollno == _firstRoundStudents[index].rollno)
         : _secRoundStudents.add(s);
 
-    s.isAdded = !s.isAdded;
-    int index = _firstRoundStudents.indexOf(s);
     _firstRoundStudents[index] =
-        Student(name: s.name, rollno: s.rollno, isAdded: s.isAdded);
+        Student(name: s.name, rollno: s.rollno, isAdded: !s.isAdded);
 
     /*   _firstRoundStudents[_firstRoundStudents.indexOf(s)].isAdded =
         !_firstRoundStudents[_firstRoundStudents.indexOf(s)].isAdded; */
@@ -57,13 +56,14 @@ class MainScopedModel extends Model {
   }
 
   void addStudentsToThirdRound(Student s) {
-    _secRoundStudents[_secRoundStudents.indexOf(s)].isAdded
-        ? _thirdRoundStudents.remove(s)
-        : _thirdRoundStudents.add(s);
-    s.isAdded = !s.isAdded;
     int index = _secRoundStudents.indexOf(s);
+    _secRoundStudents[_secRoundStudents.indexOf(s)].isAdded
+        ? _thirdRoundStudents.removeWhere(
+            (student) => student.rollno == _secRoundStudents[index].rollno)
+        : _thirdRoundStudents.add(s);
+
     _secRoundStudents[index] =
-        Student(name: s.name, rollno: s.rollno, isAdded: s.isAdded);
+        Student(name: s.name, rollno: s.rollno, isAdded: !s.isAdded);
 
     //_selectedStudent = null;
     notifyListeners();

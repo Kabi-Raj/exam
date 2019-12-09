@@ -8,11 +8,16 @@ import 'package:flutter/material.dart';
 class Theory extends StatefulWidget {
   final MainScopedModel model;
   Theory(this.model);
+
   @override
   _TheoryState createState() => _TheoryState(model);
 }
 
 class _TheoryState extends State<Theory> {
+  final MainScopedModel round1Model = MainScopedModel();
+  final MainScopedModel round2Model = MainScopedModel();
+  final MainScopedModel round3Model = MainScopedModel();
+
   final MainScopedModel model;
   _TheoryState(this.model);
 
@@ -54,7 +59,15 @@ class _TheoryState extends State<Theory> {
             ),
           ),
           body: TabBarView(
-            children: <Widget>[Round1(model), Round2(model), Round3()],
+            children: <Widget>[
+              /*  ScopedModel<MainScopedModel>(model: round1Model, child: Round1()),
+              ScopedModel<MainScopedModel>(model: round2Model, child: Round2()),
+              ScopedModel<MainScopedModel>(model: round3Model, child: Round3()) */
+
+              Round1(),
+              Round2(),
+              Round3()
+            ],
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
