@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         routes: {
-          '/': (BuildContext context) => Theory(model),
-          '/documents': (BuildContext context) => Documents(),
+          '/theory': (BuildContext context) => Theory(model),
+          '/': (BuildContext context) => Documents(),
         },
       ),
     );

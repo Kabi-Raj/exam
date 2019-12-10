@@ -25,15 +25,63 @@ class _CaptureMediaState extends State<CaptureMedia> {
   final String appBartitle;
 
   _CaptureMediaState(this.index, this.appBartitle);
-  List<File> _images = [];
+  List<File> _images = List<File>();
+  File _video;
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
 
+  _buildVideoPicker() {
+    return _video == null
+        ? Container(
+            width: MediaQuery.of(context).size.width,
+            // margin: EdgeInsets.only(bottom: 10.0),
+            child: GestureDetector(
+              child: Icon(
+                Icons.video_call,
+                size: 100.0,
+              ),
+              onTap: () => _showDialog('video'),
+            ),
+          )
+        : Chewie(
+            controller: ChewieController(
+                looping: true,
+                aspectRatio: 3 / 2,
+                autoPlay: true,
+                allowFullScreen: true,
+                allowMuting: true,
+                videoPlayerController: videoPlayerController),
+          );
+  }
+
+  _buildImageGridView() {
+    return GridView.builder(
+      itemCount: _images.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 2.0,
+          mainAxisSpacing: 2.0,
+          childAspectRatio: 2 / 4),
+      itemBuilder: (context, int index) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(20.0),
+          child: Image.file(
+            _images[index],
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          ),
+        );
+      },
+    );
+  }
+
   getVideo(ImageSource source) async {
     var video = await MultiMediaPicker.pickVideo(source: source);
+
     setState(() {
       if (video != null) {
-        videoPlayerController = VideoPlayerController.file(video);
+        _video = video;
+        videoPlayerController = VideoPlayerController.file(_video);
       }
     });
   }
@@ -41,13 +89,17 @@ class _CaptureMediaState extends State<CaptureMedia> {
   getImages(ImageSource source, bool singleImage) async {
     try {
       var images = await MultiMediaPicker.pickImages(
-          maxHeight: 200.0,
-          maxWidth: 200.0,
+          maxHeight: 100.0,
+          maxWidth: 100.0,
           source: source,
           singleImage: singleImage);
+      /*  var dir = await getExternalStorageDirectory();
+      var path = File('$dir/${DateTime.now()}.jpg');
+      print('image path: $path'); */
+      print('image path: $images');
       setState(() {
         if (images != null) {
-          _images = images;
+          _images.addAll(images);
         }
       });
     } on Exception catch (e) {
@@ -55,78 +107,50 @@ class _CaptureMediaState extends State<CaptureMedia> {
     }
   }
 
-  _buildImageList() {
-    return _images == null
-        ? Text('No images taken')
-        : ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical,
-            padding: EdgeInsets.symmetric(vertical: 10.0),
-            itemCount: _images.length,
-            itemBuilder: (context, int index) {
-              return Image.file(_images[index]);
-            },
-          );
+  _showDialog(String media) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              elevation: 10.0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              title: Text('choose an option'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Gallery'),
+                  onPressed: () {
+                    media == 'video'
+                        ? getVideo(ImageSource.gallery)
+                        : index == 2
+                            ? getImages(ImageSource.gallery, true)
+                            : getImages(ImageSource.gallery, false);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                FlatButton(
+                  child: Text('Camera'),
+                  onPressed: () {
+                    media == 'video'
+                        ? getVideo(ImageSource.camera)
+                        : index == 2
+                            ? getImages(ImageSource.camera, true)
+                            : getImages(ImageSource.camera, false);
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            ));
   }
 
-  _buildVideoPlayer() {
-    return FittedBox(
-      fit: BoxFit.contain,
-      child: videoPlayerController == null
-          ? SizedBox(
-              height: 5.0,
-              width: 5.0,
-            )
-          : Chewie(
-              controller: ChewieController(
-                  looping: true,
-                  aspectRatio: 3 / 2,
-                  autoPlay: true,
-                  allowFullScreen: true,
-                  allowMuting: true,
-                  videoPlayerController: videoPlayerController),
-            ),
-    );
-  }
-
-  _buildColumn(int index) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        FlatButton.icon(
-          icon: Icon(Icons.videocam),
-          label: Text('Take Video from camera'),
-          onPressed: () {
-            getVideo(ImageSource.camera);
-          },
+  _buildAddImage() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: GestureDetector(
+        child: Icon(
+          Icons.add_a_photo,
+          size: 100.0,
         ),
-        SizedBox(height: 5.0),
-        FlatButton.icon(
-          icon: Icon(Icons.videocam),
-          label: Text('Take Video from gallery'),
-          onPressed: () {
-            getVideo(ImageSource.gallery);
-          },
-        ),
-        SizedBox(height: 5.0),
-        FlatButton.icon(
-          icon: Icon(Icons.photo),
-          label: Text('Import image from gallery'),
-          onPressed: () {
-            getImages(ImageSource.gallery, false);
-          },
-        ),
-        SizedBox(height: 5.0),
-        FlatButton.icon(
-          icon: Icon(Icons.camera),
-          label: Text('Take picture from camera'),
-          onPressed: () {
-            index == 2
-                ? getImages(ImageSource.camera, true)
-                : getImages(ImageSource.camera, false);
-          },
-        )
-      ],
+        onTap: () => _showDialog('image'),
+      ),
     );
   }
 
@@ -138,20 +162,31 @@ class _CaptureMediaState extends State<CaptureMedia> {
         appBar: AppBar(
           title: Text(appBartitle),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              _buildColumn(index),
-              Container(
-                child: _buildVideoPlayer(),
-                height: 200.0,
-              ),
-              Container(
-                child: _buildImageList(),
-                height: 400.0,
-              )
-            ],
-          ),
+        body: Column(
+          children: <Widget>[
+            Flexible(
+              child: _buildVideoPicker(),
+              flex: 2,
+            ),
+            Flexible(
+              child: _buildAddImage(),
+              flex: 2,
+            ),
+            //SizedBox(height: 10.0),
+            _images.length == 0
+                ? DecoratedBox(
+                    decoration: BoxDecoration(shape: BoxShape.rectangle),
+                    child: Text(
+                      'No Images taken',
+                      style: TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : Flexible(
+                    child: _buildImageGridView(),
+                    flex: 8,
+                  ),
+          ],
         ),
       ),
     );
